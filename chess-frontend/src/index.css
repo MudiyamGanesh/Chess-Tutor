@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* LIGHT MODE: Clean, airy, and high-contrast */
+  --color-bgLight: #fafafa;
+  --color-bgDark: #09090b;
+  
+  /* DARK MODE: True minimalist pitch/zinc black to make accents pop */
+  --color-surfaceLight: #ffffff;
+  --color-surfaceDark: #18181b;
+  
+  /* TEXT: Crisp off-blacks and off-whites to reduce eye strain */
+  --color-textLight: #171717;
+  --color-textDark: #ededed;
+  
+  /* ACCENTS: Unified neon purple/fuchsia gradients for both themes */
+  --color-accentLight1: #8b5cf6; /* Vibrant Violet */
+  --color-accentLight2: #d946ef; /* Bright Fuchsia */
+  
+  /* THE BLACK PANTHER GLOW: Pure, bright, luminous purples. Zero dark shades. */
+  --color-accentDark1: #a855f7;  /* Glowing Wakandan Purple */
+  --color-accentDark2: #e879f9;  /* Electric Magenta Aura */
+}
+
+@layer base {
+  body {
+    background-color: var(--color-bgLight);
+    color: var(--color-textLight);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .dark body {
+    background-color: var(--color-bgDark);
+    color: var(--color-textDark);
+  }
+}
