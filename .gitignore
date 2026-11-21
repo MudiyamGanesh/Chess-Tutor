@@ -3,6 +3,8 @@ node_modules/
 __pycache__/
 venv/
 env/
+.venv/
 .DS_Store
 *.zip
 *.exe
+hf_space_backend/

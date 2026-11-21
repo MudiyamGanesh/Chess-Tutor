@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: chess-tutor-backend
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false

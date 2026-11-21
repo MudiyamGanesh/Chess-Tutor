@@ -584,11 +584,29 @@ const GameArena = () => {
     setIsAnalyzing(true);
     
     try {
-      const response = await fetch("http://127.0.0.1:8000/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pgn: game.pgn(), player_color: playerColor })
-      });
+      const apiBase = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
+      const primaryUrl = apiBase ? `${apiBase}/analyze` : "/analyze";
+      
+      let response;
+      try {
+        response = await fetch(primaryUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pgn: game.pgn(), player_color: playerColor })
+        });
+      } catch (networkErr) {
+        const fallbackUrl = "https://ramganeshm-chess-tutor-backend.hf.space/analyze";
+        if (primaryUrl !== fallbackUrl) {
+          console.warn("Primary endpoint unreachable, trying Hugging Face direct endpoint...", networkErr);
+          response = await fetch(fallbackUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pgn: game.pgn(), player_color: playerColor })
+          });
+        } else {
+          throw networkErr;
+        }
+      }
 
       const data = await response.json();
       

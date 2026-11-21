@@ -23,7 +23,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,7 +33,28 @@ class AnalyzeRequest(BaseModel):
     pgn: str
     player_color: str  # Will receive 'w' or 'b'
 
-STOCKFISH_PATH = "./stockfish/stockfish-windows-x86-64-avx2.exe"
+import shutil
+
+def find_stockfish():
+    env_p = os.getenv("STOCKFISH_PATH")
+    if env_p and (os.path.exists(env_p) or shutil.which(env_p)):
+        return env_p
+    which_p = shutil.which("stockfish")
+    if which_p:
+        return which_p
+    for p in ["/usr/games/stockfish", "/usr/bin/stockfish"]:
+        if os.path.exists(p):
+            return p
+    win_paths = [
+        os.path.join(os.path.dirname(__file__), "stockfish", "stockfish-windows-x86-64-avx2.exe"),
+        "./stockfish/stockfish-windows-x86-64-avx2.exe"
+    ]
+    for p in win_paths:
+        if os.path.exists(p):
+            return p
+    return "stockfish"
+
+STOCKFISH_PATH = find_stockfish()
 
 @app.get("/")
 def read_root():

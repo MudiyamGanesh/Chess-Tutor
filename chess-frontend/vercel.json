@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/analyze",
+      "destination": "https://ramganeshm-chess-tutor-backend.hf.space/analyze"
+    },
+    {
+      "source": "/api/:match*",
+      "destination": "https://ramganeshm-chess-tutor-backend.hf.space/api/:match*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

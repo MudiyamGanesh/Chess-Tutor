@@ -1,6 +1,8 @@
-fastapi
-uvicorn
-python-multipart
-pydantic
-stockfish
-groq
+fastapi>=0.115.0
+uvicorn>=0.30.0
+python-multipart>=0.0.12
+pydantic>=2.0.0
+chess>=1.11.0
+python-dotenv>=1.0.0
+groq>=0.11.0
+stockfish>=3.28.0
