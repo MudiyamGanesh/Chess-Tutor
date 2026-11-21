@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/analyze",
-      "destination": "https://ramganeshm-chess-tutor-backend.hf.space/analyze"
+      "destination": "https://chess-tutor-3sja.onrender.com/analyze"
     },
     {
       "source": "/api/:match*",
-      "destination": "https://ramganeshm-chess-tutor-backend.hf.space/api/:match*"
+      "destination": "https://chess-tutor-3sja.onrender.com/api/:match*"
     },
     {
       "source": "/(.*)",

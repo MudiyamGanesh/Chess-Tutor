@@ -595,9 +595,9 @@ const GameArena = () => {
           body: JSON.stringify({ pgn: game.pgn(), player_color: playerColor })
         });
       } catch (networkErr) {
-        const fallbackUrl = "https://ramganeshm-chess-tutor-backend.hf.space/analyze";
+        const fallbackUrl = "https://chess-tutor-3sja.onrender.com/analyze";
         if (primaryUrl !== fallbackUrl) {
-          console.warn("Primary endpoint unreachable, trying Hugging Face direct endpoint...", networkErr);
+          console.warn("Primary endpoint unreachable, trying Render direct endpoint...", networkErr);
           response = await fetch(fallbackUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
