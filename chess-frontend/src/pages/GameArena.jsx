@@ -584,53 +584,64 @@ const GameArena = () => {
     setIsAnalyzing(true);
     
     try {
-      const apiBase = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
-      const primaryUrl = apiBase ? `${apiBase}/analyze` : "/analyze";
-      
-      let response;
-      try {
-        response = await fetch(primaryUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pgn: game.pgn(), player_color: playerColor })
-        });
-      } catch (networkErr) {
-        const fallbackUrl = "https://chess-tutor-3sja.onrender.com/analyze";
-        if (primaryUrl !== fallbackUrl) {
-          console.warn("Primary endpoint unreachable, trying Render direct endpoint...", networkErr);
-          response = await fetch(fallbackUrl, {
+      const rawEnv = (import.meta.env.VITE_API_URL || "").replace(/[\u200B-\u200D\uFEFF]/g, '').trim().replace(/\/+$/, "");
+      const candidates = [
+        rawEnv ? `${rawEnv}/analyze` : null,
+        "https://chess-tutor-3sja.onrender.com/analyze",
+        "/analyze"
+      ].filter(Boolean);
+
+      const endpoints = Array.from(new Set(candidates));
+      let response = null;
+      let lastError = null;
+
+      for (const endpoint of endpoints) {
+        try {
+          const res = await fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ pgn: game.pgn(), player_color: playerColor })
           });
-        } else {
-          throw networkErr;
+          if (res.ok) {
+            response = res;
+            break;
+          } else if (res.status === 502 || res.status === 503) {
+            console.warn(`Endpoint ${endpoint} returned ${res.status} (server waking up)`);
+            lastError = new Error("Backend server on Render is waking up from idle mode (takes ~30s on cold start). Please wait 15 seconds and click Analyze again!");
+          } else {
+            const errText = await res.text();
+            lastError = new Error(`Server returned error ${res.status}: ${errText}`);
+          }
+        } catch (fetchErr) {
+          console.warn(`Failed to connect to ${endpoint}:`, fetchErr);
+          lastError = fetchErr;
         }
+      }
+
+      if (!response) {
+        throw lastError || new Error("All backend endpoints were unreachable.");
       }
 
       const data = await response.json();
       
-      if (response.ok) {
-        if (data.blunders_found > 0 || data.brilliant_found > 0) {
-          setAnalysisData(data);
-          
-          if (data.blunders_found > 0) {
-            setReviewMode('blunders');
-            setReviewIndex(0);
-            setGame(new Chess(data.blunders[0].fen));
-          } else {
-            setReviewMode('brilliant');
-            setReviewIndex(0);
-            setGame(new Chess(data.brilliant_moves[0].fen));
-          }
+      if (data.blunders_found > 0 || data.brilliant_found > 0) {
+        setAnalysisData(data);
+        
+        if (data.blunders_found > 0) {
+          setReviewMode('blunders');
+          setReviewIndex(0);
+          setGame(new Chess(data.blunders[0].fen));
         } else {
-          setPerfectGame(true);
+          setReviewMode('brilliant');
+          setReviewIndex(0);
+          setGame(new Chess(data.brilliant_moves[0].fen));
         }
       } else {
-        alert("Error analyzing game: " + (data.detail || "Unknown error"));
+        setPerfectGame(true);
       }
     } catch (error) {
-      alert("Failed to connect to backend. Is your FastAPI server (uvicorn main:app --reload) currently running?");
+      console.error("Game analysis error:", error);
+      alert(error.message || "Failed to connect to backend. Please ensure the server is online and try again.");
     } finally {
       setIsAnalyzing(false);
     }
